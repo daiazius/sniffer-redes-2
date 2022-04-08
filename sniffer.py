@@ -1,8 +1,6 @@
-from curses.ascii import TAB
 import struct
 import socket
 import textwrap
-
 
 TAB_1 = '\t - '
 TAB_2 = '\t\t - '
@@ -11,6 +9,7 @@ TAB_3 = '\t\t\t - '
 TAB_DADO_1 = '\t '
 TAB_DADO_2 = '\t\t '
 TAB_DADO_3 = '\t\t\t '
+
 
 # Sniffer
 def main():
@@ -31,7 +30,7 @@ def main():
             print('Protocolo IPv4:')
             print(TAB_1 + 'Versao: {}, Comprimento Header: {}, TTL: {}'.format(versao, length_cabecalho, ttl))
             print(TAB_1 + 'Protocolo: {}, Origem: {}, Destino: {}'.format(ip_proto, orgm, dest))
-            
+
             # ICMP
             if ip_proto == 1:
                 tipo_icmp, codigo, checksum, dados = pacote_icmp(dados)
@@ -39,23 +38,27 @@ def main():
                 print(TAB_2 + 'Tipo: {}, Codigo: {}, Checksum: {},'.format(tipo_icmp, codigo, checksum))
                 print(TAB_2 + 'Dados:')
                 print(format_multi_line(TAB_DADO_3, dados))
-            
+
             # TCP
             elif ip_proto == 6:
-                (porta_orgm, porta_dest, sequencia, ack, flag_urg, flag_ack, flag_psh, flag_rst, flag_syn, flag_fin, dados) = segmento_tcp(dados)
+                (porta_orgm, porta_dest, sequencia, ack, flag_urg, flag_ack, flag_psh, flag_rst, flag_syn, flag_fin,
+                 dados) = segmento_tcp(dados)
                 print(TAB_1 + 'Segmento TCP:')
                 print(TAB_2 + 'Porta Origem: {}, Porta Destino: {}'.format(porta_orgm, porta_dest))
                 print(TAB_2 + 'Sequencia: {}, Acknowledgment: {},'.format(sequencia, ack))
                 print(TAB_2 + 'Flags:')
-                print(TAB_3 + 'URG: {}, ACK: {}, PSH: {}, RST: {}, SYN: {}, FIN: {}'.format(flag_urg, flag_ack, flag_psh, flag_rst, flag_syn, flag_fin))
+                print(
+                    TAB_3 + 'URG: {}, ACK: {}, PSH: {}, RST: {}, SYN: {}, FIN: {}'.format(flag_urg, flag_ack, flag_psh,
+                                                                                          flag_rst, flag_syn, flag_fin))
                 print(TAB_2 + 'Dados:')
                 print(format_multi_line(TAB_DADO_3, dados))
-            
+
             # UDP
             elif ip_proto == 17:
-               porta_orgm, porta_dest, comprimento, dados = segmento_udp(dados)
-               print(TAB_1 + 'Segmento UDP:')
-               print(TAB_2 + 'Porta Origem: {}, Porta Destino: {}, Comprimento: {}'.format(porta_orgm, porta_dest, comprimento))
+                porta_orgm, porta_dest, comprimento, dados = segmento_udp(dados)
+                print(TAB_1 + 'Segmento UDP:')
+                print(TAB_2 + 'Porta Origem: {}, Porta Destino: {}, Comprimento: {}'.format(porta_orgm, porta_dest,
+                                                                                            comprimento))
 
             # Outros
             else:
@@ -65,7 +68,9 @@ def main():
         else:
             print('Dados:')
             print(format_multi_line(TAB_DADO_1, dados))
-        print('\n-------------------------------------------------------------------------------------------------------')
+        print(
+            '\n-------------------------------------------------------------------------------------------------------')
+
 
 # Desempacotar quadro Ethernet.
 # !: network byte order (= big-endian), 6s: char[6], H: unsigned short
@@ -113,7 +118,8 @@ def segmento_tcp(dados):
     flag_rst = (offset_reservados_flags & 4) >> 2
     flag_syn = (offset_reservados_flags & 2) >> 1
     flag_fin = offset_reservados_flags & 1
-    return porta_orgm, porta_dest, sequencia, ack, flag_urg, flag_ack, flag_psh, flag_rst, flag_syn, flag_fin, dados[offset:]
+    return porta_orgm, porta_dest, sequencia, ack, flag_urg, flag_ack, flag_psh, flag_rst, flag_syn, flag_fin, dados[
+                                                                                                               offset:]
 
 
 # Desempacotar segmento UDP
@@ -131,5 +137,6 @@ def format_multi_line(prefix, string, size=80):
         if size % 2:
             size -= 1
     return '\n'.join([prefix + line for line in textwrap.wrap(string, size)])
+
 
 main()
